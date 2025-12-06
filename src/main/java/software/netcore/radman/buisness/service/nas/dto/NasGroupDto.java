@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 import software.netcore.radman.buisness.validation.constrain.Cheap;
 import software.netcore.radman.buisness.validation.constrain.Expensive;
+import software.netcore.radman.buisness.validation.constrain.IpAddress;
 
 import jakarta.validation.GroupSequence;
 import jakarta.validation.constraints.NotEmpty;
@@ -26,7 +27,8 @@ public class NasGroupDto {
     private String groupName;
 
     @NotEmpty(message = "IP address is required", groups = Cheap.class)
-    @Length(min = 1, max = 15, message = "IP address length can be maximally 15 characters", groups = Expensive.class)
+    @Length(min = 1, max = 45, message = "IP address length can be maximally 45 characters", groups = Expensive.class)
+    @IpAddress(message = "Must be a valid IPv4 or IPv6 address", groups = Expensive.class)
     private String nasIpAddress;
 
     @Length(max = 15, message = "Port ID length can be maximally 15 characters")

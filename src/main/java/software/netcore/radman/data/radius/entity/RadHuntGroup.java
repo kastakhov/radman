@@ -26,7 +26,7 @@ public class RadHuntGroup {
     @Column(name = "groupname", nullable = false, length = 64)
     private String groupName;
 
-    @Column(name = "nasipaddress", nullable = false, length = 15)
+    @Column(name = "nasipaddress", nullable = false, length = 45)
     private String nasIpAddress;
 
     @Column(name = "nasportid", length = 15)
