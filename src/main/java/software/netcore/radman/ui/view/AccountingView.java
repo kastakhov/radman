@@ -41,7 +41,7 @@ import java.util.TimeZone;
  */
 @Slf4j
 @PageTitle("RadMan: Accounting")
-@Route(value = "tutorial", layout = MenuTemplate.class)
+@Route(value = "accounting", layout = MenuTemplate.class)
 public class AccountingView extends VerticalLayout {
 
     private static final long serialVersionUID = 3707074325227335832L;
