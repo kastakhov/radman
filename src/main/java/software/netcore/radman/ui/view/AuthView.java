@@ -256,20 +256,25 @@ public class AuthView extends VerticalLayout {
             username.setItemLabelGenerator(RadiusUserDto::getUsername);
             groupName = new ComboBox<>("Group name");
             groupName.setItemLabelGenerator(RadiusGroupDto::getName);
-            username.setDataProvider(new CallbackDataProvider<>(query ->
+            username.setDataProvider(
+                    new CallbackDataProvider<RadiusUserDto, String>(query ->
                     userService.pageRadiusUsers(new RadiusUserFilter(query.getFilter().orElse(null),
                             true, false), PageRequest.of(query.getOffset(),
                             query.getLimit(), Sort.by(Sort.Direction.ASC, "id"))).stream(),
                     query -> (int) userService.countRadiusUsers(new RadiusUserFilter(query.getFilter()
-                            .orElse(null), true, false))));
-            groupName.setDataProvider(new CallbackDataProvider<>(query ->
+                            .orElse(null), true, false))),
+                    s -> s);
+            groupName.setDataProvider(
+                    new CallbackDataProvider<RadiusGroupDto, String>(query ->
                     userService.pageRadiusUsersGroup(new RadiusGroupFilter(query.getFilter().orElse(null),
                             true, false), PageRequest.of(query.getOffset(),
                             query.getLimit(), Sort.by(Sort.Direction.ASC, "id"))).stream(),
                     query -> (int) userService.countRadiusUsersGroup(new RadiusGroupFilter(query.getFilter()
-                            .orElse(null), true, false))));
+                            .orElse(null), true, false))),
+                    s -> s);
 
-            Select<AuthTarget> authTargetSelect = new Select<>(AuthTarget.values());
+            Select<AuthTarget> authTargetSelect = new Select<>();
+            authTargetSelect.setItems(AuthTarget.values());
             authTargetSelect.setLabel("Type");
             authTargetSelect.setItemLabelGenerator(AuthTarget::getValue);
             authTargetSelect.setTextRenderer(AuthTarget::getValue);
@@ -321,7 +326,8 @@ public class AuthView extends VerticalLayout {
                 }
             });
 
-            Select<RadiusOp> opSelect = new Select<>(RadiusOp.values());
+            Select<RadiusOp> opSelect = new Select<>();
+            opSelect.setItems(RadiusOp.values());
             opSelect.setLabel("Operation");
             opSelect.setItemLabelGenerator(RadiusOp::getValue);
             opSelect.setTextRenderer(RadiusOp::getValue);

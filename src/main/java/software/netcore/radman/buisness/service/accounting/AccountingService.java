@@ -94,7 +94,7 @@ public class AccountingService {
             booleanBuilder.and(QRadAcct.radAcct.acctStartTime.isNotNull());
             booleanBuilder.and(QRadAcct.radAcct.acctStopTime.isNull());
         }
-        return booleanBuilder.getValue();
+        return booleanBuilder;
     }
 
 }

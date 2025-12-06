@@ -110,7 +110,7 @@ public class NasService {
             booleanBuilder.or(QNas.nas.server.contains(searchText));
             booleanBuilder.or(QNas.nas.type.contains(searchText));
         }
-        return booleanBuilder.getValue();
+        return booleanBuilder;
     }
 
     private Predicate buildNasGroupSearchPredicate(@Nullable String searchText) {

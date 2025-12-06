@@ -8,8 +8,8 @@ import org.hibernate.validator.constraints.Range;
 import software.netcore.radman.buisness.validation.constrain.Cheap;
 import software.netcore.radman.buisness.validation.constrain.Expensive;
 
-import javax.validation.GroupSequence;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.GroupSequence;
+import jakarta.validation.constraints.NotEmpty;
 
 /**
  * @since v. 1.0.0

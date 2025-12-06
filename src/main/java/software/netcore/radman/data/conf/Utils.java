@@ -3,9 +3,11 @@ package software.netcore.radman.data.conf;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
+import java.io.File;
 import java.util.HashMap;
 
 /**
@@ -36,13 +38,21 @@ class Utils {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog(properties.getChangeLog());
-        liquibase.setContexts(properties.getContexts());
+        if (properties.getContexts() != null && !properties.getContexts().isEmpty()) {
+            liquibase.setContexts(String.join(",", properties.getContexts()));
+        }
         liquibase.setDefaultSchema(properties.getDefaultSchema());
         liquibase.setDropFirst(properties.isDropFirst());
         liquibase.setShouldRun(properties.isEnabled());
-        liquibase.setLabels(properties.getLabels());
-        liquibase.setChangeLogParameters(properties.getParameters());
-        liquibase.setRollbackFile(properties.getRollbackFile());
+        if (properties.getLabelFilter() != null && !properties.getLabelFilter().isEmpty()) {
+            liquibase.setLabelFilter(String.join(",", properties.getLabelFilter()));
+        }
+        if (properties.getParameters() != null) {
+            liquibase.setChangeLogParameters(properties.getParameters());
+        }
+        if (properties.getRollbackFile() != null) {
+            liquibase.setRollbackFile(properties.getRollbackFile());
+        }
         return liquibase;
     }
 

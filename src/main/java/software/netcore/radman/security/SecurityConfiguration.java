@@ -2,19 +2,21 @@ package software.netcore.radman.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.ldap.authentication.BindAuthenticator;
+import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import software.netcore.radman.data.internal.repo.SystemUserRepo;
 import software.netcore.radman.security.fallback.FallbackAuthenticationProvider;
 import software.netcore.radman.security.fallback.SingleUserDetailsManager;
@@ -23,13 +25,16 @@ import software.netcore.radman.security.ldap.LdapProperties;
 import software.netcore.radman.security.ldap.LocalLdapAuthoritiesPopulator;
 import software.netcore.radman.security.local.LocalAuthenticationProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @since v. 1.0.0
  */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration {
 
     private static final String LOGIN_FAILURE_URL = "/login?error";
     private static final String LOGIN_URL = "/login";
@@ -37,20 +42,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final SystemUserRepo systemUserRepo;
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         //@formatter:off
-        // Not using Spring CSRF here to be able to use plain HTML for the login page
-		http.csrf().disable()
+        // Vaadin handles CSRF internally
+		http.csrf(csrf -> csrf.disable())
 				// Register our CustomRequestCache, that saves unauthorized access attempts, so
 				// the user is redirected after login.
-				.requestCache()
-                    .requestCache(new VaadinRequestCache())
+				.requestCache(cache -> cache.requestCache(new VaadinRequestCache()))
 				// Restrict access to our application.
-				.and()
-					.authorizeRequests()
+				.authorizeHttpRequests(auth -> auth
 				    // Allow static resources
-					.antMatchers(
+					.requestMatchers(
 							"/VAADIN/**",
 							"/favicon.ico",
 							"/robots.txt",
@@ -68,38 +71,61 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				    // Allow all requests by logged in users.
 					.anyRequest()
 						.authenticated()
+				)
 				// Configure the login page.
-				.and()
-					.formLogin()
+				.formLogin(form -> form
 					.loginPage(LOGIN_URL)
 					.permitAll()
                     .successHandler(loginSuccessHandler())
 					.failureUrl(LOGIN_FAILURE_URL)
+				)
 				// Configure logout
-				.and()
-					.logout()
-					.logoutSuccessUrl(LOGOUT_SUCCESS_URL);
+				.logout(logout -> logout
+					.logoutSuccessUrl(LOGOUT_SUCCESS_URL)
+				)
+				// Set the authentication manager
+				.authenticationManager(authenticationManager());
         //@formatter:on
+        return http.build();
     }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(fallbackAuthenticationProvider());
-        auth.authenticationProvider(localAuthenticationProvider());
+    @Bean
+    public AuthenticationManager authenticationManager() throws Exception {
+        List<AuthenticationProvider> providers = new ArrayList<>();
+        providers.add(fallbackAuthenticationProvider());
+        providers.add(localAuthenticationProvider());
+        
         if (ldapProperties().isEnabled()) {
-            //@formatter:off
-            auth.ldapAuthentication()
-                    .userSearchFilter(ldapProperties().getUserSearchFilter())
-                    .userSearchBase(ldapProperties().getSearchBaseDn())
-                    .contextSource()
-                        .managerDn(ldapProperties().getManagerDn())
-                        .managerPassword(ldapProperties().getManagerPassword())
-                        .url(ldapProperties().getUrls())
-                    .and()
-                        .ldapAuthoritiesPopulator(ldapAuthoritiesPopulator())
-                        .rolePrefix("");
-            //@formatter:on
+            providers.add(ldapAuthenticationProvider());
         }
+        
+        return new ProviderManager(providers);
+    }
+    
+    private AuthenticationProvider ldapAuthenticationProvider() throws Exception {
+        LdapProperties props = ldapProperties();
+        
+        org.springframework.security.ldap.DefaultSpringSecurityContextSource contextSource = 
+            new org.springframework.security.ldap.DefaultSpringSecurityContextSource(props.getUrls());
+        contextSource.setUserDn(props.getManagerDn());
+        contextSource.setPassword(props.getManagerPassword());
+        contextSource.afterPropertiesSet();
+        
+        FilterBasedLdapUserSearch userSearch = new FilterBasedLdapUserSearch(
+            props.getSearchBaseDn(), 
+            props.getUserSearchFilter(), 
+            contextSource
+        );
+        
+        BindAuthenticator authenticator = new BindAuthenticator(contextSource);
+        authenticator.setUserSearch(userSearch);
+        
+        LdapAuthenticationProvider provider = new LdapAuthenticationProvider(
+            authenticator, 
+            ldapAuthoritiesPopulator()
+        );
+        
+        return provider;
     }
 
     @Bean

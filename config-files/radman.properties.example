@@ -8,7 +8,6 @@ database.radius.datasource.password=[password-here]
 database.radius.datasource.test-while-idle=true
 database.radius.datasource.validation-query=/* ping */
 database.radius.datasource.driver-class-name=org.mariadb.jdbc.Driver
-database.radius.jpa.hibernate.dialect=org.hibernate.dialect.MySQL5Dialect
 database.radius.jpa.show-sql=false
 database.radius.jpa.hibernate.ddl-auto=validate
 
@@ -19,7 +18,6 @@ database.radman.datasource.password=[password-here]
 database.radman.datasource.test-while-idle=true
 database.radman.datasource.validation-query=/* ping */
 database.radman.datasource.driver-class-name=org.mariadb.jdbc.Driver
-database.radman.jpa.hibernate.dialect=org.hibernate.dialect.MySQL5Dialect
 database.radman.jpa.show-sql=false
 database.radman.jpa.hibernate.ddl-auto=validate
 

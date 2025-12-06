@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.18</version>
+        <version>3.5.8</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -29,7 +29,7 @@
         <querydsl.version>5.1.0</querydsl.version>
 
         <!--vaadin dependencies-->
-        <vaadin.version>23.4.0</vaadin.version>
+        <vaadin.version>24.9.6</vaadin.version>
 
         <!--spring dependencies-->
         <vaadin-spring-data-provider.version>2.1.0</vaadin-spring-data-provider.version>
@@ -38,7 +38,8 @@
         <!--maven plugins-->
         <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version> 
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version> 
-
+        <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
+        <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
     </properties>
 
     <dependencyManagement>
@@ -95,10 +96,14 @@
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-apt</artifactId>
+            <version>${querydsl.version}</version>
+            <classifier>jakarta</classifier>
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
+            <version>${querydsl.version}</version>
+            <classifier>jakarta</classifier>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat</groupId>
@@ -193,12 +198,17 @@
                         <groupId>com.querydsl</groupId>
                         <artifactId>querydsl-apt</artifactId>
                         <version>${querydsl.version}</version>
-                        <classifier>jpa</classifier>
+                        <classifier>jakarta</classifier>
                     </path>
                     <path>
-                        <groupId>javax.persistence</groupId>
-                        <artifactId>javax.persistence-api</artifactId>
-                        <version>2.2</version>
+                        <groupId>jakarta.persistence</groupId>
+                        <artifactId>jakarta.persistence-api</artifactId>
+                        <version>${jakarta.persistence-api.version}</version>
+                    </path>
+                    <path>
+                        <groupId>jakarta.annotation</groupId>
+                        <artifactId>jakarta.annotation-api</artifactId>
+                        <version>${jakarta.annotation-api.version}</version>
                     </path>
                 </annotationProcessorPaths>
                 <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>

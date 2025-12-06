@@ -6,10 +6,10 @@ import lombok.Setter;
 import software.netcore.radman.buisness.validation.constrain.Cheap;
 import software.netcore.radman.buisness.validation.constrain.Expensive;
 
-import javax.validation.GroupSequence;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.GroupSequence;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * @since v. 1.0.0

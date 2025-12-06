@@ -138,20 +138,24 @@ public class UserToGroupView extends VerticalLayout {
             ComboBox<RadiusGroupDto> groupName = new ComboBox<>("Group name");
             groupName.setItemLabelGenerator(RadiusGroupDto::getName);
 
-            username.setDataProvider(new CallbackDataProvider<>(query ->
+            username.setDataProvider(
+                    new CallbackDataProvider<RadiusUserDto, String>(query ->
                     userService.pageRadiusUsers(new RadiusUserFilter(query.getFilter().orElse(null),
                             true, false), PageRequest.of(query.getOffset(),
                             query.getLimit(), Sort.by(Sort.Direction.ASC, "id")))
                             .stream(),
                     query -> (int) userService.countRadiusUsers(new RadiusUserFilter(query.getFilter()
-                            .orElse(null), true, false))));
-            groupName.setDataProvider(new CallbackDataProvider<>(query ->
+                            .orElse(null), true, false))),
+                    s -> s);
+            groupName.setDataProvider(
+                    new CallbackDataProvider<RadiusGroupDto, String>(query ->
                     userService.pageRadiusUsersGroup(new RadiusGroupFilter(query.getFilter().orElse(null),
                             true, false), PageRequest.of(query.getOffset(),
                             query.getLimit(), Sort.by(Sort.Direction.ASC, "id")))
                             .stream(),
                     query -> (int) userService.countRadiusUsersGroup(new RadiusGroupFilter(query.getFilter()
-                            .orElse(null), true, false))));
+                            .orElse(null), true, false))),
+                    s -> s);
             groupName.addValueChangeListener(event -> username.setInvalid(false));
 
             binder = new BeanValidationBinder<>(RadiusUserToGroupDto.class);

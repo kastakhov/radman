@@ -75,13 +75,13 @@ public class SystemUsersView extends VerticalLayout {
         } else {
             Grid<SystemUserDto> grid = new Grid<>(SystemUserDto.class, false);
             grid.addColumns("username", "role");
-            grid.addColumn(new LocalDateTimeRenderer<>(systemUserDto -> {
+            grid.addColumn(new LocalDateTimeRenderer<SystemUserDto>(systemUserDto -> {
                 if (systemUserDto.getLastLoginTime() == null) {
                     return null;
                 }
                 return LocalDateTime.ofEpochSecond(systemUserDto.getLastLoginTime(), 0,
                         OffsetDateTime.now().getOffset());
-            }, DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy h:mm, a", Locale.US), "never"))
+            }, () -> DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy h:mm, a", Locale.US)))
                     .setSortable(true)
                     .setHeader("Last login time")
                     .setSortProperty("lastLoginTime");
@@ -171,10 +171,8 @@ public class SystemUsersView extends VerticalLayout {
             password.setValueChangeMode(ValueChangeMode.EAGER);
             password.setWidthFull();
             ComboBox<RoleDto> role = new ComboBox<>("Role", RoleDto.values());
-            role.setPreventInvalidInput(true);
             role.setWidthFull();
             ComboBox<AuthProviderDto> authProvider = new ComboBox<>("Authentication provider", AuthProviderDto.values());
-            authProvider.setPreventInvalidInput(true);
             authProvider.setWidthFull();
             authProvider.addValueChangeListener(event -> {
                 if (AuthProviderDto.LOCAL == event.getValue()) {
@@ -241,7 +239,6 @@ public class SystemUsersView extends VerticalLayout {
             FormLayout formLayout = new FormLayout();
             formLayout.add(new H3("Edit system user"));
             ComboBox<RoleDto> role = new ComboBox<>("Role", RoleDto.values());
-            role.setPreventInvalidInput(true);
             role.setWidthFull();
 
             binder = new Binder<>(SystemUserDto.class);

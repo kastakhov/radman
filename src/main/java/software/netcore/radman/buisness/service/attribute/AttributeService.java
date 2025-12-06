@@ -23,7 +23,7 @@ import software.netcore.radman.data.radius.repo.RadGroupCheckRepo;
 import software.netcore.radman.data.radius.repo.RadGroupReplyRepo;
 import software.netcore.radman.data.radius.repo.RadReplyRepo;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
