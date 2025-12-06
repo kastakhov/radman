@@ -133,10 +133,17 @@ public class UserToGroupView extends VerticalLayout {
             add(new H3("Add user to group"));
 
             ComboBox<RadiusUserDto> username = new ComboBox<>("Username");
-            username.setItemLabelGenerator(RadiusUserDto::getUsername);
+            username.setItemLabelGenerator(user -> {
+                if (user.getDescription() != null && !user.getDescription().trim().isEmpty()) {
+                    return user.getDescription();
+                }
+                return user.getUsername();
+            });
             username.setAutofocus(true);
+            username.setWidth("500px");
             ComboBox<RadiusGroupDto> groupName = new ComboBox<>("Group name");
             groupName.setItemLabelGenerator(RadiusGroupDto::getName);
+            groupName.setWidth("500px");
 
             username.setDataProvider(
                     new CallbackDataProvider<RadiusUserDto, String>(query ->
