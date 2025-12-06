@@ -307,21 +307,19 @@ public class AuthService {
     /**
      * Takes a name, user type (user or group) and a Map with key: Map and value: Map<String, String>.  If
      * combination of name and user doesn't exist in the provided Map, initialize an entry and return a
-     * Map<String, String> with K:V as name:<provided name> and type:<provided type>
+     * Map<String, String> with K:V as name:<provided name> and type:<provided type>. 
+     * Uses the current size of the data map to generate unique keys for multi-valued attributes.
      * @param name
      * @param type
      * @param data
      * @return Map<String, String>
      */
-    private static int row_counter = 0;
     private Map<String, String> initDefaultRowDataIfRequired(String name, String type,
                                                              Map<String, Map<String, String>> data) {
-        // Set key to a combination of the name (normally username) and user type (either user or group) and, per my addition,
-        // the `row_counter` variable.  This stops multivalued attributes being added to the same row which breaks Vaadin and instead
-        // pushes them to a separate row.  Yes it's hacky and the if statement could be removed, might refactor but it's perfectly performant
-        // for it's purpose
-        String key = name + ":" + type + ":" + row_counter;
-        row_counter++;
+        // Set key to a combination of the name (normally username), user type (either user or group), and the current 
+        // size of the data map. This stops multivalued attributes being added to the same row which breaks Vaadin and 
+        // instead pushes them to a separate row. Using the map size ensures thread-safe unique key generation.
+        String key = name + ":" + type + ":" + data.size();
         // Create an object of type Map
         Map<String, String> singleData;
         // If the referred data doesn't contain the above key
@@ -330,8 +328,7 @@ public class AuthService {
             singleData = new HashMap<>();
             // Put key and empty HashMap into referred data
             data.put(key, singleData);
-            //  Add name and type to initialized HashMap, Java references are weird.  Post-addition seems to propagate
-            //  to all referees
+            //  Add name and type to initialized HashMap
             singleData.put(NAME_COLUMN_KEY, name);
             singleData.put(TYPE_COLUMN_KEY, type);
         } else {
