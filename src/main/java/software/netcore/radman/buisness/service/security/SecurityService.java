@@ -78,5 +78,10 @@ public class SecurityService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null && autoLoginUsername.equals(authentication.getName());
     }
+    
+    public String getLoggedUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null ? authentication.getName() : null;
+    }
 
 }

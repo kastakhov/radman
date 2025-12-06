@@ -47,6 +47,15 @@ public class SystemUserService {
         systemUser = systemUserRepo.save(systemUser);
         return conversionService.convert(systemUser, SystemUserDto.class);
     }
+    
+    public SystemUserDto updateSystemUserPassword(@NonNull Long userId, @NonNull String newPassword) {
+        SystemUser systemUser = systemUserRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("System user not found"));
+        systemUser.setPasswordLength(newPassword.length());
+        systemUser.setPassword(passwordEncoder.encode(newPassword));
+        systemUser = systemUserRepo.save(systemUser);
+        return conversionService.convert(systemUser, SystemUserDto.class);
+    }
 
     public void deleteSystemUser(@NonNull SystemUserDto user) {
         systemUserRepo.deleteById(user.getId());

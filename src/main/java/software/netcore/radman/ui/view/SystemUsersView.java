@@ -234,12 +234,24 @@ public class SystemUsersView extends VerticalLayout {
     private class SystemUserEditDialog extends Dialog {
 
         private final Binder<SystemUserDto> binder;
+        private final PasswordField newPassword;
+        private final PasswordField confirmPassword;
 
         SystemUserEditDialog(UpdateListener<SystemUserDto> updateListener) {
             FormLayout formLayout = new FormLayout();
             formLayout.add(new H3("Edit system user"));
             ComboBox<RoleDto> role = new ComboBox<>("Role", RoleDto.values());
             role.setWidthFull();
+            
+            newPassword = new PasswordField("New Password");
+            newPassword.setValueChangeMode(ValueChangeMode.EAGER);
+            newPassword.setWidthFull();
+            newPassword.setVisible(false);
+            
+            confirmPassword = new PasswordField("Confirm Password");
+            confirmPassword.setValueChangeMode(ValueChangeMode.EAGER);
+            confirmPassword.setWidthFull();
+            confirmPassword.setVisible(false);
 
             binder = new Binder<>(SystemUserDto.class);
             binder.forField(role)
@@ -257,6 +269,29 @@ public class SystemUsersView extends VerticalLayout {
                 if (validationStatus.isOk()) {
                     try {
                         SystemUserDto userDto = binder.getBean();
+                        
+                        // Handle password update if provided
+                        if (newPassword.isVisible() && !newPassword.isEmpty()) {
+                            String pwd = newPassword.getValue();
+                            String confirmPwd = confirmPassword.getValue();
+                            
+                            if (!pwd.equals(confirmPwd)) {
+                                confirmPassword.setInvalid(true);
+                                confirmPassword.setErrorMessage("Passwords do not match");
+                                return;
+                            }
+                            
+                            if (!pwd.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d\\!@#\\$%\\^&\\*\\(\\)\\-_\\=\\+\\.\\:;\\?]{8,64}$")) {
+                                newPassword.setInvalid(true);
+                                newPassword.setErrorMessage("Password requires one lowercase letter, uppercase letter and number. " +
+                                        "Spaces, tabs nor unicode characters are not allowed. " +
+                                        "Its length has to be within 8 to 64 characters");
+                                return;
+                            }
+                            
+                            userDto = service.updateSystemUserPassword(userDto.getId(), pwd);
+                        }
+                        
                         userDto = service.updateSystemUser(userDto);
                         updateListener.onUpdated(this, userDto);
                         setOpened(false);
@@ -275,6 +310,8 @@ public class SystemUsersView extends VerticalLayout {
             controls.setWidthFull();
 
             formLayout.add(role);
+            formLayout.add(newPassword);
+            formLayout.add(confirmPassword);
             formLayout.add(new Hr());
             formLayout.add(controls);
             formLayout.setMaxWidth("400px");
@@ -284,6 +321,31 @@ public class SystemUsersView extends VerticalLayout {
         void edit(SystemUserDto systemUserDto) {
             setOpened(true);
             binder.setBean(systemUserDto);
+            
+            // Clear password fields
+            newPassword.clear();
+            confirmPassword.clear();
+            newPassword.setInvalid(false);
+            confirmPassword.setInvalid(false);
+            
+            // Show password fields only for LOCAL auth provider users
+            if (systemUserDto.getAuthProvider() == AuthProviderDto.LOCAL) {
+                RoleDto currentUserRole = securityService.getLoggedUserRole();
+                String currentUsername = securityService.getLoggedUsername();
+                
+                // Admin can change anyone's password, READ_ONLY can only change their own
+                if (currentUserRole == RoleDto.ADMIN || 
+                    (currentUserRole == RoleDto.READ_ONLY && systemUserDto.getUsername().equals(currentUsername))) {
+                    newPassword.setVisible(true);
+                    confirmPassword.setVisible(true);
+                } else {
+                    newPassword.setVisible(false);
+                    confirmPassword.setVisible(false);
+                }
+            } else {
+                newPassword.setVisible(false);
+                confirmPassword.setVisible(false);
+            }
         }
 
     }
