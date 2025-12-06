@@ -15,6 +15,7 @@ import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.router.RouterLink;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.security.core.context.SecurityContextHolder;
+import software.netcore.radman.buisness.service.security.SecurityService;
 import software.netcore.radman.ui.component.wizard.Wizard;
 import software.netcore.radman.ui.component.wizard.demo.DemoDataStorage;
 import software.netcore.radman.ui.component.wizard.demo.IntroductionStep;
@@ -33,8 +34,10 @@ public class MenuTemplate extends Div implements RouterLayout {
     private static final String SELECTED_CLASS_NAME = "selected";
 
     private final UnorderedList linksContainer;
+    private final SecurityService securityService;
 
-    public MenuTemplate(BuildProperties buildProperties) {
+    public MenuTemplate(BuildProperties buildProperties, SecurityService securityService) {
+        this.securityService = securityService;
         addClassName("main-layout");
         setSizeFull();
         getStyle()
@@ -71,6 +74,11 @@ public class MenuTemplate extends Div implements RouterLayout {
             .set("color", "#e6e6e6");
         logoutButton.addClickListener(e -> logout());
         logoutDiv.add(logoutButton);
+        
+        // Hide logout button if user is auto-logged in
+        if (securityService.isCurrentUserAutoLogin()) {
+            logoutDiv.setVisible(false);
+        }
 
         accountNav.add(versionDiv, logoutDiv);
 

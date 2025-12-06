@@ -1,6 +1,7 @@
 package software.netcore.radman.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +43,12 @@ public class SecurityConfiguration {
 
     private final SystemUserRepo systemUserRepo;
 
+    @Value("${security.auto-login.enabled:false}")
+    private boolean autoLoginEnabled;
+
+    @Value("${security.auto-login.username:auto-admin}")
+    private String autoLoginUsername;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         //@formatter:off
@@ -49,28 +56,35 @@ public class SecurityConfiguration {
 		http.csrf(csrf -> csrf.disable())
 				// Register our CustomRequestCache, that saves unauthorized access attempts, so
 				// the user is redirected after login.
-				.requestCache(cache -> cache.requestCache(new VaadinRequestCache()))
-				// Restrict access to our application.
-				.authorizeHttpRequests(auth -> auth
-				    // Allow static resources
-					.requestMatchers(
-							"/VAADIN/**",
-							"/favicon.ico",
-							"/robots.txt",
-							"/manifest.webmanifest",
-							"/sw.js",
-							"/offline-page.html",
-							"/frontend/**",
-							"/webjars/**",
-							"/frontend-es5/**",
-							"/frontend-es6/**")
-						.permitAll()
-				    // Allow all flow internal requests.
-					.requestMatchers(VaadinRequestMatcher::matches)
-						.permitAll()
-				    // Allow all requests by logged in users.
-					.anyRequest()
-						.authenticated()
+				.requestCache(cache -> cache.requestCache(new VaadinRequestCache()));
+		
+		if (autoLoginEnabled) {
+			// Auto-login mode: permit all requests and add auto-login filter
+			http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+				.addFilterBefore(new AutoLoginFilter(autoLoginEnabled, autoLoginUsername), 
+						org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+		} else {
+			// Normal mode: require authentication
+			http.authorizeHttpRequests(auth -> auth
+					    // Allow static resources
+						.requestMatchers(
+								"/VAADIN/**",
+								"/favicon.ico",
+								"/robots.txt",
+								"/manifest.webmanifest",
+								"/sw.js",
+								"/offline-page.html",
+								"/frontend/**",
+								"/webjars/**",
+								"/frontend-es5/**",
+								"/frontend-es6/**")
+							.permitAll()
+					    // Allow all flow internal requests.
+						.requestMatchers(VaadinRequestMatcher::matches)
+							.permitAll()
+					    // Allow all requests by logged in users.
+						.anyRequest()
+							.authenticated()
 				)
 				// Configure the login page.
 				.formLogin(form -> form
@@ -85,6 +99,7 @@ public class SecurityConfiguration {
 				)
 				// Set the authentication manager
 				.authenticationManager(authenticationManager());
+		}
         //@formatter:on
         return http.build();
     }

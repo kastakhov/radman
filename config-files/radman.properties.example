@@ -43,3 +43,7 @@ logging.level.software.netcore.radman=INFO
 # component settings
 vaadin.productionMode=true
 spring.jpa.open-in-view=false
+
+# security auto-login (WARNING: Only use in development/testing - disables login page and logs in as admin)
+security.auto-login.enabled=false
+security.auto-login.username=auto-admin

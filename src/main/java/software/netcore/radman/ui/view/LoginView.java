@@ -108,6 +108,12 @@ public class LoginView extends Div implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        // If auto-login is enabled, redirect to home page
+        if (securityService.isAutoLoginEnabled()) {
+            event.forwardTo(UsersView.class);
+            return;
+        }
+        
         securityService.initiateFallbackUser();
         if (event.getLocation().getQueryParameters().getParameters().containsKey("error")) {
             authenticationMessage.getStyle().set("display", "block");

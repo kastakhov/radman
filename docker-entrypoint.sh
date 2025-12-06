@@ -38,6 +38,9 @@ export LOG_LEVEL_RADMAN="${LOG_LEVEL_RADMAN:-INFO}"
 # Production mode
 export VAADIN_PRODUCTION_MODE="${VAADIN_PRODUCTION_MODE:-true}"
 
+export SECURITY_AUTO_LOGIN_ENABLED="${SECURITY_AUTO_LOGIN_ENABLED:-false}"
+export SECURITY_AUTO_LOGIN_USERNAME="${SECURITY_AUTO_LOGIN_USERNAME:-auto-admin}"
+
 echo "Generating radman.properties configuration file..."
 
 # Use envsubst to substitute environment variables in the template

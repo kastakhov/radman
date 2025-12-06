@@ -43,3 +43,7 @@ logging.level.software.netcore.radman=${LOG_LEVEL_RADMAN}
 # component settings
 vaadin.productionMode=${VAADIN_PRODUCTION_MODE}
 spring.jpa.open-in-view=false
+
+# security auto-login (WARNING: Only use in development/testing - disables login page and logs in as admin)
+security.auto-login.enabled=${SECURITY_AUTO_LOGIN_ENABLED}
+security.auto-login.username=${SECURITY_AUTO_LOGIN_USERNAME}

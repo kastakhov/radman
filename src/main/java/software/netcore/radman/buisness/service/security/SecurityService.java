@@ -3,6 +3,7 @@ package software.netcore.radman.buisness.service.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +26,12 @@ public class SecurityService {
 
     private final SingleUserDetailsManager userDetailsManager;
     private final SystemUserRepo systemUserRepo;
+    
+    @Value("${security.auto-login.enabled:false}")
+    private boolean autoLoginEnabled;
+    
+    @Value("${security.auto-login.username:auto-admin}")
+    private String autoLoginUsername;
 
     public RoleDto getLoggedUserRole() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -54,6 +61,22 @@ public class SecurityService {
 
     private String generatePassword() {
         return "P" + RandomStringUtils.randomAlphabetic(8, 10);
+    }
+    
+    public boolean isAutoLoginEnabled() {
+        return autoLoginEnabled;
+    }
+    
+    public String getAutoLoginUsername() {
+        return autoLoginUsername;
+    }
+    
+    public boolean isCurrentUserAutoLogin() {
+        if (!autoLoginEnabled) {
+            return false;
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && autoLoginUsername.equals(authentication.getName());
     }
 
 }
