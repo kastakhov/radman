@@ -1,0 +1,47 @@
+# http port
+server.port=${SERVER_PORT}
+
+# radius database
+database.radius.datasource.url=jdbc:mariadb://${RADIUS_DB_HOST}:${RADIUS_DB_PORT}/${RADIUS_DB_NAME}?serverTimezone=UTC
+database.radius.datasource.username=${RADIUS_DB_USER}
+database.radius.datasource.password=${RADIUS_DB_PASSWORD}
+database.radius.datasource.test-while-idle=true
+database.radius.datasource.validation-query=/* ping */
+database.radius.datasource.driver-class-name=org.mariadb.jdbc.Driver
+database.radius.jpa.hibernate.dialect=org.hibernate.dialect.MariaDBDialect
+database.radius.jpa.show-sql=false
+database.radius.jpa.hibernate.ddl-auto=validate
+
+# internal database
+database.radman.datasource.url=jdbc:mariadb://${RADMAN_DB_HOST}:${RADMAN_DB_PORT}/${RADMAN_DB_NAME}?serverTimezone=UTC
+database.radman.datasource.username=${RADMAN_DB_USER}
+database.radman.datasource.password=${RADMAN_DB_PASSWORD}
+database.radman.datasource.test-while-idle=true
+database.radman.datasource.validation-query=/* ping */
+database.radman.datasource.driver-class-name=org.mariadb.jdbc.Driver
+database.radman.jpa.hibernate.dialect=org.hibernate.dialect.MariaDBDialect
+database.radman.jpa.show-sql=false
+database.radman.jpa.hibernate.ddl-auto=validate
+
+# liquibase
+database.radman.liquibase.enabled=${LIQUIBASE_ENABLED}
+database.radman.liquibase.change-log=classpath:db/changelog/mariadb/db.changelog-master.xml
+database.radman.liquibase.check-change-log-location=true
+
+# ldap
+ldap.enabled=${LDAP_ENABLED}
+ldap.urls=${LDAP_URLS}
+ldap.managerDn=${LDAP_MANAGER_DN}
+ldap.managerPassword=${LDAP_MANAGER_PASSWORD}
+ldap.search-base-dn=${LDAP_SEARCH_BASE_DN}
+ldap.user-search-filter=${LDAP_USER_SEARCH_FILTER}
+
+# logging
+logging.file=${LOG_FILE}
+logging.level.root=${LOG_LEVEL_ROOT}
+logging.level.org.springframework.boot=${LOG_LEVEL_SPRING}
+logging.level.software.netcore.radman=${LOG_LEVEL_RADMAN}
+
+# component settings
+vaadin.productionMode=${VAADIN_PRODUCTION_MODE}
+spring.jpa.open-in-view=false
