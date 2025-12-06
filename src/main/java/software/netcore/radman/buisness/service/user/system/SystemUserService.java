@@ -16,8 +16,8 @@ import software.netcore.radman.data.internal.entity.AuthProvider;
 import software.netcore.radman.data.internal.entity.QSystemUser;
 import software.netcore.radman.data.internal.entity.SystemUser;
 import software.netcore.radman.data.internal.repo.SystemUserRepo;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 

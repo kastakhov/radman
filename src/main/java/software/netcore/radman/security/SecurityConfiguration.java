@@ -49,6 +49,19 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				// Restrict access to our application.
 				.and()
 					.authorizeRequests()
+				    // Allow static resources
+					.antMatchers(
+							"/VAADIN/**",
+							"/favicon.ico",
+							"/robots.txt",
+							"/manifest.webmanifest",
+							"/sw.js",
+							"/offline-page.html",
+							"/frontend/**",
+							"/webjars/**",
+							"/frontend-es5/**",
+							"/frontend-es6/**")
+						.permitAll()
 				    // Allow all flow internal requests.
 					.requestMatchers(VaadinRequestMatcher::matches)
 						.permitAll()
@@ -67,27 +80,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 					.logout()
 					.logoutSuccessUrl(LOGOUT_SUCCESS_URL);
         //@formatter:on
-    }
-
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(
-                // Vaadin Flow static resources //
-                "/VAADIN/**",
-                // the standard favicon URI
-                "/favicon.ico",
-                // the robots exclusion standard
-                "/robots.txt",
-                // web application manifest //
-                "/manifest.webmanifest",
-                "/sw.js",
-                "/offline-page.html",
-                // (development mode) static resources //
-                "/frontend/**",
-                // (development mode) webjars //
-                "/webjars/**",
-                // (production mode) static resources //
-                "/frontend-es5/**", "/frontend-es6/**");
     }
 
     @Override

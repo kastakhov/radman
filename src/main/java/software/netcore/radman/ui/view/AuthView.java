@@ -259,13 +259,13 @@ public class AuthView extends VerticalLayout {
             username.setDataProvider(new CallbackDataProvider<>(query ->
                     userService.pageRadiusUsers(new RadiusUserFilter(query.getFilter().orElse(null),
                             true, false), PageRequest.of(query.getOffset(),
-                            query.getLimit(), new Sort(Sort.Direction.ASC, "id"))).stream(),
+                            query.getLimit(), Sort.by(Sort.Direction.ASC, "id"))).stream(),
                     query -> (int) userService.countRadiusUsers(new RadiusUserFilter(query.getFilter()
                             .orElse(null), true, false))));
             groupName.setDataProvider(new CallbackDataProvider<>(query ->
                     userService.pageRadiusUsersGroup(new RadiusGroupFilter(query.getFilter().orElse(null),
                             true, false), PageRequest.of(query.getOffset(),
-                            query.getLimit(), new Sort(Sort.Direction.ASC, "id"))).stream(),
+                            query.getLimit(), Sort.by(Sort.Direction.ASC, "id"))).stream(),
                     query -> (int) userService.countRadiusUsersGroup(new RadiusGroupFilter(query.getFilter()
                             .orElse(null), true, false))));
 
@@ -298,7 +298,7 @@ public class AuthView extends VerticalLayout {
             attribute.setDataProvider((ComboBox.FetchItemsCallback<U>)
                             (searchText, offset, limit) -> pageAttributes(new AttributeFilter(searchText,
                                             true, false),
-                                    PageRequest.of(offset, limit, new Sort(Sort.Direction.ASC, "id")))
+                                    PageRequest.of(offset, limit, Sort.by(Sort.Direction.ASC, "id")))
                                     .stream(),
                     (SerializableFunction<String, Integer>) searchText ->
                             (int) countAttributes(new AttributeFilter(searchText, true,

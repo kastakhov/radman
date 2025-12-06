@@ -141,14 +141,14 @@ public class UserToGroupView extends VerticalLayout {
             username.setDataProvider(new CallbackDataProvider<>(query ->
                     userService.pageRadiusUsers(new RadiusUserFilter(query.getFilter().orElse(null),
                             true, false), PageRequest.of(query.getOffset(),
-                            query.getLimit(), new Sort(Sort.Direction.ASC, "id")))
+                            query.getLimit(), Sort.by(Sort.Direction.ASC, "id")))
                             .stream(),
                     query -> (int) userService.countRadiusUsers(new RadiusUserFilter(query.getFilter()
                             .orElse(null), true, false))));
             groupName.setDataProvider(new CallbackDataProvider<>(query ->
                     userService.pageRadiusUsersGroup(new RadiusGroupFilter(query.getFilter().orElse(null),
                             true, false), PageRequest.of(query.getOffset(),
-                            query.getLimit(), new Sort(Sort.Direction.ASC, "id")))
+                            query.getLimit(), Sort.by(Sort.Direction.ASC, "id")))
                             .stream(),
                     query -> (int) userService.countRadiusUsersGroup(new RadiusGroupFilter(query.getFilter()
                             .orElse(null), true, false))));

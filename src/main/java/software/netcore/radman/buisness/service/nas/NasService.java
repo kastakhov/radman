@@ -19,8 +19,8 @@ import software.netcore.radman.data.radius.entity.QRadHuntGroup;
 import software.netcore.radman.data.radius.entity.RadHuntGroup;
 import software.netcore.radman.data.radius.repo.NasRepo;
 import software.netcore.radman.data.radius.repo.RadHuntGroupRepo;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
