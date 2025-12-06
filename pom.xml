@@ -33,6 +33,7 @@
 
         <!--spring dependencies-->
         <vaadin-spring-data-provider.version>2.1.0</vaadin-spring-data-provider.version>
+        <mariadb-java-client.version>3.5.6</mariadb-java-client.version>
 
         <!--maven plugins-->
         <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version> 
@@ -108,8 +109,9 @@
             <artifactId>liquibase-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>${mariadb-java-client.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>
