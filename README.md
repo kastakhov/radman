@@ -11,6 +11,7 @@ If you want to see more of RadMan, check the [Screenshots](https://github.com/ne
 - [Screenshots](#screenshots)
 - [How does RadMan work](#how-does-radman-work)
 - [How to deploy RadMan](#how-to-deploy-radman)
+- [Docker deployment](#docker-deployment)
 - [How to upgrade RadMan](#how-to-upgrade-radman)
 - [RadMan config file](#radman-config-file)
 - [Common startup issues](#common-startup-issues)
@@ -120,6 +121,131 @@ You may need to adjust `iptables` or other firewalls to allow connections to `80
 When connecting to RadMan for the first time, there will be no users in it's user database.  
 Check the log file for one-time login credentials so you can perform the first login (`tail -f /var/log/radman`).  
 After the first login, generate your RadMan users in the `System users` menu.
+
+## Docker deployment
+RadMan is available as a Docker container from GitHub Container Registry.
+
+### Quick start with Docker
+Pull the latest image:
+```bash
+docker pull ghcr.io/kastakhov/radman:latest
+```
+
+Run RadMan container:
+```bash
+docker run -d \
+  --name radman \
+  -p 8089:8089 \
+  -e RADIUS_DB_HOST=your-radius-db \
+  -e RADIUS_DB_PORT=3306 \
+  -e RADIUS_DB_NAME=radius \
+  -e RADIUS_DB_USERNAME="radius_user" \
+  -e RADIUS_DB_PASSWORD="radius_password" \
+  -e RADMAN_DB_HOST=your-radman-db \
+  -e RADMAN_DB_PORT=3306 \
+  -e RADMAN_DB_NAME=radman \
+  -e RADMAN_DB_USERNAME="radman_user" \
+  -e RADMAN_DB_PASSWORD="radman_password" \
+  ghcr.io/kastakhov/radman:latest
+```
+
+### Available tags
+- `latest` - Latest stable release
+- `X.Y.Z` - Specific version (e.g., `1.0.0`)
+
+### Environment variables
+You can find supported environment variables for the RadMan Docker container inside [radman.properties.docker](config-files/radman.properties.docker)
+
+**Application:**
+- `SERVER_PORT` - Application port (default: `8089`)
+
+### Docker Compose example
+```yaml
+services:
+  mariadb-radius:
+    image: mariadb:lts-ubi
+    container_name: mariadb-radius
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MARIADB_DATABASE: ${RADIUS_DB_NAME}
+      MARIADB_USER: ${RADIUS_DB_USER}
+      MARIADB_PASSWORD: ${RADIUS_DB_PASSWORD}
+    volumes:
+      - mariadb-radius-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s # Allows time for initial setup without failing
+
+  mariadb-radman:
+    image: mariadb:lts-ubi
+    container_name: mariadb-radman
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MARIADB_DATABASE: ${RADMAN_DB_NAME}
+      MARIADB_USER: ${RADMAN_DB_USER}
+      MARIADB_PASSWORD: ${RADMAN_DB_PASSWORD}
+    volumes:
+      - mariadb-radman-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  radman:
+    build:
+      context: radman
+      dockerfile: Dockerfile
+    container_name: radman
+    restart: unless-stopped
+    ports:
+      - "8089:8089"
+    env_file:
+      - .env
+    depends_on:
+      mariadb-radius:
+        condition: service_healthy
+      mariadb-radman:
+        condition: service_healthy
+
+volumes:  
+  mariadb-radius-data:
+  mariadb-radman-data:
+```
+
+### .env example
+```shell
+MARIADB_ROOT_USER=root
+MARIADB_ROOT_PASSWORD=rootpassword
+
+RADIUS_DB_HOST=mariadb-radius
+RADIUS_DB_PORT=3306
+RADIUS_DB_NAME=radius
+RADIUS_DB_USER=radius
+RADIUS_DB_PASSWORD=radius
+
+RADMAN_DB_HOST=mariadb-radman
+RADMAN_DB_PORT=3306
+RADMAN_DB_NAME=radman
+RADMAN_DB_USER=radman
+RADMAN_DB_PASSWORD=radman
+
+SERVER_PORT=8089
+```
+
+### Building from source
+To build the Docker image locally:
+```bash
+docker build -t radman:local .
+```
 
 # How to upgrade RadMan
 Download a new release binary from our [GitHub Releases](https://github.com/netcore-jsa/radman/releases).  
