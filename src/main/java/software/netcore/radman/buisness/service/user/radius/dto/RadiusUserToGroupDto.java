@@ -26,4 +26,6 @@ public class RadiusUserToGroupDto {
 
     private boolean groupInRadman;
 
+    private String userDescription;
+
 }

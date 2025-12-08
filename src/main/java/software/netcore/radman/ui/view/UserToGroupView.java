@@ -66,7 +66,7 @@ public class UserToGroupView extends VerticalLayout {
 
         RoleDto role = securityService.getLoggedUserRole();
         Grid<RadiusUserToGroupDto> grid = new Grid<>(RadiusUserToGroupDto.class, false);
-        grid.addColumns("username", "groupName", "userInRadman", "groupInRadman");
+        grid.addColumns("username", "userDescription", "groupName", "userInRadman", "groupInRadman");
         DataProvider<RadiusUserToGroupDto, Object> dataProvider = new SpringDataProviderBuilder<>(
                 (pageable, o) -> userService.pageRadiusUserToGroupRecords(filter, pageable),
                 value -> userService.countRadiusUserToGroupRecords(filter))

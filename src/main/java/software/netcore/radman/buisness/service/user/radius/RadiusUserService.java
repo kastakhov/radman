@@ -198,6 +198,8 @@ public class RadiusUserService {
                     RadiusUserToGroupDto dto = conversionService.convert(dtos, RadiusUserToGroupDto.class);
                     dto.setUserInRadman(radiusUserRepo.exists(QRadiusUser.radiusUser.username.like(dto.getUsername())));
                     dto.setGroupInRadman(radiusGroupRepo.exists(QRadiusGroup.radiusGroup.name.like(dto.getGroupName())));
+                    radiusUserRepo.findOne(QRadiusUser.radiusUser.username.like(dto.getUsername()))
+                            .ifPresent(user -> dto.setUserDescription(user.getDescription()));
                     return dto;
                 })
                 .collect(Collectors.toList());
