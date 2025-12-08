@@ -187,23 +187,63 @@ public class RadiusUserService {
     }
 
     public long countRadiusUserToGroupRecords(@NonNull Filter filter) {
-        return radUserGroupRepo.count(buildRadiusUserToGroupSearchPredicate(filter));
+        List<RadUserGroup> allRecords = new java.util.ArrayList<>();
+        radUserGroupRepo.findAll(buildRadiusUserToGroupSearchPredicate(filter)).forEach(allRecords::add);
+        return allRecords.stream()
+                .map(RadUserGroup::getUsername)
+                .distinct()
+                .count();
     }
 
     public Page<RadiusUserToGroupDto> pageRadiusUserToGroupRecords(@NonNull Filter filter,
                                                                    @NonNull Pageable pageable) {
-        Page<RadUserGroup> page = radUserGroupRepo.findAll(buildRadiusUserToGroupSearchPredicate(filter), pageable);
-        List<RadiusUserToGroupDto> userToGroupDtos = page.stream()
-                .map(dtos -> {
-                    RadiusUserToGroupDto dto = conversionService.convert(dtos, RadiusUserToGroupDto.class);
-                    dto.setUserInRadman(radiusUserRepo.exists(QRadiusUser.radiusUser.username.like(dto.getUsername())));
-                    dto.setGroupInRadman(radiusGroupRepo.exists(QRadiusGroup.radiusGroup.name.like(dto.getGroupName())));
-                    radiusUserRepo.findOne(QRadiusUser.radiusUser.username.like(dto.getUsername()))
+        List<RadUserGroup> allRecords = new java.util.ArrayList<>();
+        radUserGroupRepo.findAll(buildRadiusUserToGroupSearchPredicate(filter)).forEach(allRecords::add);
+        
+        // Group by username
+        List<RadiusUserToGroupDto> userToGroupDtos = allRecords.stream()
+                .collect(Collectors.groupingBy(RadUserGroup::getUsername))
+                .entrySet().stream()
+                .map(entry -> {
+                    String username = entry.getKey();
+                    List<RadUserGroup> userGroups = entry.getValue();
+                    
+                    RadiusUserToGroupDto dto = new RadiusUserToGroupDto();
+                    dto.setUsername(username);
+                    
+                    // Collect all group names for this user
+                    List<String> groupNames = userGroups.stream()
+                            .map(RadUserGroup::getGroupName)
+                            .collect(Collectors.toList());
+                    dto.setGroupNames(groupNames);
+                    
+                    // Set the first group ID for potential delete operations
+                    dto.setId(userGroups.get(0).getId());
+                    
+                    // Check if user exists in radman
+                    dto.setUserInRadman(radiusUserRepo.exists(QRadiusUser.radiusUser.username.like(username)));
+                    
+                    // Check if any group exists in radman
+                    boolean anyGroupInRadman = groupNames.stream()
+                            .anyMatch(groupName -> radiusGroupRepo.exists(QRadiusGroup.radiusGroup.name.like(groupName)));
+                    dto.setGroupInRadman(anyGroupInRadman);
+                    
+                    // Get user description
+                    radiusUserRepo.findOne(QRadiusUser.radiusUser.username.like(username))
                             .ifPresent(user -> dto.setUserDescription(user.getDescription()));
+                    
                     return dto;
                 })
+                .sorted((a, b) -> a.getUsername().compareToIgnoreCase(b.getUsername()))
                 .collect(Collectors.toList());
-        return new PageImpl<>(userToGroupDtos, pageable, userToGroupDtos.size());
+        
+        // Apply pagination manually
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), userToGroupDtos.size());
+        List<RadiusUserToGroupDto> pageContent = start < userToGroupDtos.size() ? 
+                userToGroupDtos.subList(start, end) : List.of();
+        
+        return new PageImpl<>(pageContent, pageable, userToGroupDtos.size());
     }
 
     private Predicate buildRadiusUserSearchPredicate(RadiusUserFilter filter) {

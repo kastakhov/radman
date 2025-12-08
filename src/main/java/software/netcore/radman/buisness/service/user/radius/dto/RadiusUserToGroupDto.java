@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.validation.constraints.NotEmpty;
+import java.util.List;
 
 /**
  * @since v. 1.0.0
@@ -21,6 +22,8 @@ public class RadiusUserToGroupDto {
 
     @NotEmpty(message = "Group name is required")
     private String groupName;
+
+    private List<String> groupNames;
 
     private boolean userInRadman;
 

@@ -66,14 +66,19 @@ public class UserToGroupView extends VerticalLayout {
 
         RoleDto role = securityService.getLoggedUserRole();
         Grid<RadiusUserToGroupDto> grid = new Grid<>(RadiusUserToGroupDto.class, false);
-        grid.addColumns("username", "userDescription", "groupName", "userInRadman", "groupInRadman");
+        grid.addColumn(RadiusUserToGroupDto::getUsername).setHeader("Username").setKey("username").setSortable(true);
+        grid.addColumn(RadiusUserToGroupDto::getUserDescription).setHeader("User Description").setKey("userDescription");
+        grid.addColumn(dto -> dto.getGroupNames() != null ? String.join(", ", dto.getGroupNames()) : "")
+                .setHeader("Group Names").setKey("groupNames");
+        grid.addColumn(RadiusUserToGroupDto::isUserInRadman).setHeader("User In Radman").setKey("userInRadman");
+        grid.addColumn(RadiusUserToGroupDto::isGroupInRadman).setHeader("Group In Radman").setKey("groupInRadman");
         DataProvider<RadiusUserToGroupDto, Object> dataProvider = new SpringDataProviderBuilder<>(
                 (pageable, o) -> userService.pageRadiusUserToGroupRecords(filter, pageable),
                 value -> userService.countRadiusUserToGroupRecords(filter))
                 .withDefaultSort("username", SortDirection.ASCENDING)
                 .build();
         grid.setDataProvider(dataProvider);
-        grid.setSortableColumns("username", "groupName");
+        grid.setSortableColumns("username");
         grid.setColumnReorderingAllowed(true);
         grid.setMinHeight("500px");
         grid.setHeight("100%");
