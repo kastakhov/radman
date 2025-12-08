@@ -17,11 +17,19 @@ COPY src ./src
 # Build the application with production profile
 RUN --mount=type=cache,target=/root/.m2 \
     --mount=type=cache,target=/root/.npm \
-        mvn -B package \
-            -Pproduction \
-            -DskipTests \
-            -Dhttps.protocols=TLSv1.2 \
-            -Daether.dependencyCollector.impl=bf
+    <<EOF
+    set -Eeux
+    # mvn clean test \
+    #     -Pproduction \
+    #     -Dhttps.protocols=TLSv1.2 \
+    #     -Daether.dependencyCollector.impl=bf
+
+    mvn -B package \
+        -Pproduction \
+        -DskipTests \
+        -Dhttps.protocols=TLSv1.2 \
+        -Daether.dependencyCollector.impl=bf
+EOF
 
 # Stage 2: Runtime
 FROM amazoncorretto:21-alpine-jdk
